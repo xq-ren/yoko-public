@@ -20,11 +20,18 @@ Yoko tracks whether members are displaying the configured server as their primar
 
 When a member uses the configured guild tag as their primary tag, Yoko automatically assigns the corresponding role. If the member changes or removes their primary guild tag, the role is removed accordingly.
 
-### Analytics
-> Planned — not yet implemented.
+### Upcoming
+> Reminders — currently in development.
+
+> Slash Commands - currently in development for Vanity Feature and Reminders
+
+### Planned
+> Ticket System
+
+> Sending embeds and/or messages as Yoko, with possible automation
 
 ### Other
-> A ticket system and welcome system are being considered as future Yoko features or as standalone projects.
+> Analytics are considered for Yoko regarding Vanity and Guild Tag Repping.
 
 ## How it works
 
