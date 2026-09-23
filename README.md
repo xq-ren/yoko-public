@@ -20,10 +20,15 @@ Yoko tracks whether members are displaying the configured server as their primar
 
 When a member uses the configured guild tag as their primary tag, Yoko automatically assigns the corresponding role. If the member changes or removes their primary guild tag, the role is removed accordingly.
 
-### Upcoming
-> Reminders — currently in development.
+### Daily Reminders
+Yoko allows users to create recurring daily reminders directly through Discord.
 
-> Slash Commands - currently in development for Vanity Feature and Reminders
+Users can configure a time, message, and channel for a reminder. Yoko stores the reminder and automatically sends the configured message at the specified time each day.
+
+### Upcoming
+> Lets call it 'The Great Split' (  - ᴗ •́  ) . Some of Yoko's functions will be moving into a separate project, creating a cleaner split between community-focused and personal functionality.
+
+> Slash Commands - currently in development for Vanity Feature and future functionalities
 
 ### Planned
 > Ticket System
@@ -34,11 +39,9 @@ When a member uses the configured guild tag as their primary tag, Yoko automatic
 > Analytics are considered for Yoko regarding Vanity and Guild Tag Repping.
 
 ## How it works
-
 Yoko's current functionality focuses on automatically detecting whether members are representing a configured Discord server and managing the corresponding roles.
 
 ### Vanity Repping
-
 Yoko uses Discord presence updates to detect changes to a member's custom status.
 
 When a presence update is received:
@@ -49,7 +52,6 @@ When a presence update is received:
 4. The vanity role is added or removed accordingly.
 
 #### Vanity Repping Flow
-
 ```mermaid
 flowchart TD
     A[Discord user changes custom status] --> B[Presence Update Event]
@@ -64,7 +66,6 @@ flowchart TD
 The flowchart above shows the internal decision process after a presence update is received. The sequence diagram below focuses on the communication between the Discord user, Discord, JDA and Yoko throughout the same process.
 
 #### Sequence Diagram
-
 ```mermaid
 sequenceDiagram
     participant U as Discord User
@@ -85,19 +86,19 @@ sequenceDiagram
 ```
 
 ### Guild Tag Repping
-
 Guild Tag Repping follows a similar process but checks a member's primary guild tag instead of their custom status.
 
 When a relevant member update is received, Yoko checks whether the member's primary guild tag matches the configured server. The corresponding role is then assigned or removed based on the result.
 
-## Architecture
+### Daily Reminder
+Since Daily Reminders will be part of 'The Great Split', I will refrain from explaining them in detail here and instead document them in the repository of the new project.
 
+## Architecture
 Yoko is built as an event-driven Java application using JDA to communicate with Discord.
 
 Discord events are received through JDA and processed by dedicated event listeners. Business logic is separated from Discord-specific event handling where possible, allowing individual features to remain modular and easier to maintain.
 
 ### Architecture Diagram
-
 The following diagram provides a simplified overview of Yoko's current architecture and the flow of communication between Discord, JDA and the bot's internal components.
 
 ```mermaid
@@ -131,7 +132,6 @@ flowchart TB
 ```
 
 ## Technologies
-
 - **Java 17** - Core application development
 - **JDA (Java Discord API)** - Discord API integration and event handling
 - **Apache Maven** - Dependency management and build automation
@@ -140,7 +140,6 @@ flowchart TB
 Yoko is packaged as an executable JAR for deployment.
 
 ## Source Code
-
 Yoko's source code is maintained in a private repository and is not publicly available.
 
 This repository serves as the public documentation of the project and contains information about its features, architecture and technical implementation.
