@@ -2,11 +2,10 @@
 This is the public repository for the Yoko Discord bot.
 
 ## What is Yoko?
-Yoko is a Discord bot developed as a personal software engineering project.
-
-The project focuses on automating Discord server management tasks while providing an environment for experimenting with different technologies and software development concepts.
-
-Yoko is currently in active development, with new functionality being added over time.
+Yoko is an event-driven Discord bot developed in Java using JDA (Java Discord API).
+The project focuses on automating Discord server management tasks, particularly role management based on user activity and server representation.
+Beyond its core functionality, Yoko serves as a personal software engineering project for exploring modular application design, event-driven architecture, database integration, and other software development concepts.
+Yoko is currently in active development, with existing features being refined and additional functionality planned for future releases.
 
 ## Features
 
@@ -26,17 +25,15 @@ Yoko allows users to create recurring daily reminders directly through Discord.
 Users can configure a time, message, and channel for a reminder. Yoko stores the reminder and automatically sends the configured message at the specified time each day.
 
 ### Upcoming
-> Lets call it 'The Great Split' (  - ᴗ •́  ) . Some of Yoko's functions will be moving into a separate project, creating a cleaner split between community-focused and personal functionality.
-
-> Slash Commands - currently in development for Vanity Feature and future functionalities
+> Let's call it 'The Great Split' ( - ᴗ •́ ). Some of Yoko's functions will be moved into a separate project, creating a cleaner separation between community-focused and personal functionality.
+> **Slash Commands** — Currently in development for the Vanity Repping feature, with plans to extend command support to other functionalities.
 
 ### Planned
-> Ticket System
-
-> Sending embeds and/or messages as Yoko, with possible automation
+> **Message & Embed Management** — Allow administrators to send customized messages and embeds through Yoko, with potential support for automated messages.
 
 ### Other
-> Analytics are considered for Yoko regarding Vanity and Guild Tag Repping.
+> **Analytics** — Exploring the use of Python for analyzing Vanity and Guild Tag Repping data, including activity trends, usage statistics, and visualizations.
+> **Ticket System** — A potential future feature for managing support requests within Discord. May also be developed as a standalone project.
 
 ## How it works
 Yoko's current functionality focuses on automatically detecting whether members are representing a configured Discord server and managing the corresponding roles.
@@ -141,7 +138,6 @@ Yoko is packaged as an executable JAR for deployment.
 
 ## Source Code
 Yoko's source code is maintained in a private repository and is not publicly available.
-
 This repository serves as the public documentation of the project and contains information about its features, architecture and technical implementation.
 
 Source code access is only provided for review purposes in connection with job applications or professional inquiries.
