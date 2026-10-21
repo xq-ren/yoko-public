@@ -1,148 +1,194 @@
-# Yoko Public (WIP)
-This is the public repository for the Yoko Discord bot.
+# Yoko — Discord Community Bot
 
-## What is Yoko?
-Yoko is an event-driven Discord bot developed in Java using JDA (Java Discord API).
-The project focuses on automating Discord server management tasks, particularly role management based on user activity and server representation.
-Beyond its core functionality, Yoko serves as a personal software engineering project for exploring modular application design, event-driven architecture, database integration, and other software development concepts.
-Yoko is currently in active development, with existing features being refined and additional functionality planned for future releases.
+Yoko is an event-driven Discord bot built with Java 17, JDA and MySQL. It automates role assignment for members who represent a Discord server through their custom status or primary guild tag.
 
-## Features
+Beyond its functionality, Yoko is a personal software engineering project through which I explore event-driven programming, application architecture, database integration and incremental refactoring.
 
-### Vanity Repping
-Yoko automatically manages vanity roles based on a user's Discord custom status.
+This repository provides public documentation of the project. The application source code is maintained in a private repository.
 
-When a member adds the configured server vanity to their custom status, Yoko automatically assigns the corresponding role. If the vanity is removed, the role is removed as well.
+> **Project status:** Active development. Repping functionality is being refined, Vanity Slash Commands are in development, and personal features are planned to move into a separate application.
+
+## Current Features
+
+### Custom Status Repping
+
+Yoko checks whether a member's Discord custom status contains the vanity text configured for their server, such as `/cigarette`.
+
+When the configured text is present, Yoko assigns the server's repping role. When the text is removed, Yoko checks whether the member still qualifies through Guild Tag Repping before removing the role.
 
 ### Guild Tag Repping
-Yoko tracks whether members are displaying the configured server as their primary guild tag.
 
-When a member uses the configured guild tag as their primary tag, Yoko automatically assigns the corresponding role. If the member changes or removes their primary guild tag, the role is removed accordingly.
+Yoko responds to changes to a user's primary guild and checks whether it matches a configured Discord server.
 
-### Daily Reminders
-Yoko allows users to create recurring daily reminders directly through Discord.
+When a member represents that server through their primary guild tag, Yoko assigns its repping role. If the member changes or removes the tag, Yoko checks whether they still qualify through Custom Status Repping before removing the role.
 
-Users can configure a time, message, and channel for a reminder. Yoko stores the reminder and automatically sends the configured message at the specified time each day.
+### Server-Specific Configuration
 
-### Upcoming
-> Let's call it 'The Great Split' ( - ᴗ •́ ). Some of Yoko's functions will be moved into a separate project, creating a cleaner separation between community-focused and personal functionality.
-> **Slash Commands** — Currently in development for the Vanity Repping feature, with plans to extend command support to other functionalities.
+Repping configuration is stored in MySQL and includes:
 
-### Planned
-> **Message & Embed Management** — Allow administrators to send customized messages and embeds through Yoko, with potential support for automated messages.
+- Vanity text to look for in custom statuses
+- Repping role
+- Notification channel
+- Perks channel referenced in notification messages
+- Separate settings to enable Custom Status Repping and Guild Tag Repping
 
-### Other
-> **Analytics** — Exploring the use of Python for analyzing Vanity and Guild Tag Repping data, including activity trends, usage statistics, and visualizations.
-> **Ticket System** — A potential future feature for managing support requests within Discord. May also be developed as a standalone project.
+Both repping methods use the same configured role within a server. Members keep this role while at least one enabled repping method still applies.
 
-## How it works
-Yoko's current functionality focuses on automatically detecting whether members are representing a configured Discord server and managing the corresponding roles.
+Configuration persistence is implemented. Managing this configuration through Vanity Slash Commands is currently in development.
 
-### Vanity Repping
-Yoko uses Discord presence updates to detect changes to a member's custom status.
+### Repping Notifications
 
-When a presence update is received:
+Yoko can send a notification to a configured server channel when a member starts repping. These messages mention the member and point them to the server's configured perks channel.
 
-1. Yoko retrieves the member's current activities.
-2. The custom status is identified and its content is checked.
-3. Yoko determines whether the configured vanity is present.
-4. The vanity role is added or removed accordingly.
+### Daily Reminders — Planned for Extraction
 
-#### Vanity Repping Flow
+The current application also includes recurring daily reminders through the `/daily` command.
+
+Users can specify a time, message and target text channel. Reminders are stored in MySQL and checked once per minute, using the `Europe/Zurich` time zone.
+
+Daily Reminders are planned to move into a separate application as part of **The Great Split**.
+
+## Development Roadmap
+
+| Area | Status |
+| --- | --- |
+| Custom Status and Guild Tag Repping | Implemented; being refined |
+| MySQL-backed repping configuration | Implemented |
+| Vanity configuration Slash Commands | In development |
+| Daily Reminders | Implemented; planned for extraction |
+| Message and Embed Management | Planned after the split |
+| Repping Analytics | Future exploration |
+| Ticket System | Potential future feature |
+
+### The Great Split
+
+Let's call it **The Great Split** ( - ᴗ •́ ).
+
+The goal is to separate community functionality from personal functionality into two independently maintainable and deployable applications.
+
+**Yoko will continue to focus on community features:**
+
+- Custom Status and Guild Tag Repping
+- Server-specific configuration
+- Community-related Slash Commands
+- Future message and embed management
+
+**A separate application will focus on personal features:**
+
+- Daily Reminders
+- Future personal productivity functionality
+
+Daily Reminders are still part of the current codebase. The extraction has not yet been completed.
+
+### Message and Embed Management
+
+After the split, the next planned feature is allowing administrators to compose and send messages and embeds through Discord Slash Commands.
+
+Initial command definitions exist, but this functionality is not yet complete.
+
+### Future Ideas
+
+These ideas are exploratory and are not part of the current implementation:
+
+- **Repping Analytics:** Use Python to analyze repping activity, trends and statistics, with potential visualizations.
+- **Automated Messages:** Extend message management with scheduled or automated messages.
+- **Ticket System:** Explore support request management, potentially as a separate project.
+
+## How Repping Works
+
+Yoko reacts to relevant Discord events rather than repeatedly checking every member.
+
+### Custom Status Updates
+
+1. JDA delivers a `UserUpdateActivitiesEvent` to `CustomStatusListener`.
+2. The listener delegates processing to `VanityService`.
+3. The service loads the server's configuration from MySQL.
+4. If Custom Status Repping is enabled, it checks whether the custom status contains the configured vanity text.
+5. The service assigns the repping role or checks whether Guild Tag Repping still qualifies the member before removing it.
+
 ```mermaid
 flowchart TD
-    A[Discord user changes custom status] --> B[Presence Update Event]
-    B --> C[Yoko receives event through JDA]
-    C --> D[Read custom status]
-    D --> E{Vanity present?}
+    A[Member changes custom status] --> B[CustomStatusListener]
+    B --> C[VanityService loads server configuration]
+    C --> D{Custom Status Repping enabled?}
 
-    E -->|Yes| F[Assign vanity role]
-    E -->|No| G[Remove vanity role]
+    D -->|No| E[No change]
+    D -->|Yes| F{Configured text present?}
+
+    F -->|Yes| G[Assign role if missing]
+    F -->|No| H{Enabled Guild Tag Repping still applies?}
+
+    H -->|Yes| I[Keep role]
+    H -->|No| J[Remove role if present]
 ```
 
-The flowchart above shows the internal decision process after a presence update is received. The sequence diagram below focuses on the communication between the Discord user, Discord, JDA and Yoko throughout the same process.
+### Primary Guild Updates
 
-#### Sequence Diagram
-```mermaid
-sequenceDiagram
-    participant U as Discord User
-    participant D as Discord
-    participant J as JDA
-    participant Y as Yoko
-
-    U->>D: Changes custom status
-    D->>J: Presence update
-    J->>Y: PresenceUpdateEvent
-    Y->>Y: Check custom status
-
-    alt Vanity is present
-        Y->>D: Assign vanity role
-    else Vanity is not present
-        Y->>D: Remove vanity role
-    end
-```
-
-### Guild Tag Repping
-Guild Tag Repping follows a similar process but checks a member's primary guild tag instead of their custom status.
-
-When a relevant member update is received, Yoko checks whether the member's primary guild tag matches the configured server. The corresponding role is then assigned or removed based on the result.
-
-### Daily Reminder
-Since Daily Reminders will be part of 'The Great Split', I will refrain from explaining them in detail here and instead document them in the repository of the new project.
+1. JDA delivers a `UserUpdatePrimaryGuildEvent` to `PrimaryGuildTagListener`.
+2. The listener delegates processing to `VanityService`.
+3. The service checks configurations associated with the previous and new primary guilds.
+4. Where Guild Tag Repping is enabled, the service assigns the corresponding role or checks Custom Status Repping before removing it.
 
 ## Architecture
-Yoko is built as an event-driven Java application using JDA to communicate with Discord.
 
-Discord events are received through JDA and processed by dedicated event listeners. Business logic is separated from Discord-specific event handling where possible, allowing individual features to remain modular and easier to maintain.
+Yoko is built as an event-driven Java application.
 
-### Architecture Diagram
-The following diagram provides a simplified overview of Yoko's current architecture and the flow of communication between Discord, JDA and the bot's internal components.
+Dedicated JDA listeners delegate repping decisions to a shared `VanityService`. This service coordinates configuration access, role changes and repping notifications.
+
+`VanityConfigRepository` handles database operations for server-specific repping configuration.
 
 ```mermaid
-flowchart TB
-    Discord[Discord]
+flowchart TD
+    Discord[Discord] --> JDA[JDA]
 
-    subgraph Yoko["Yoko - Java 17"]
-        JDA[JDA]
+    JDA --> Status[CustomStatusListener]
+    JDA --> Tag[PrimaryGuildTagListener]
 
-        subgraph Listeners["Event Listeners"]
-            Presence[Presence Listener]
-            Guild[Guild Tag Listener]
-        end
+    Status --> Service[VanityService]
+    Tag --> Service
 
-        subgraph Features["Feature Logic"]
-            Vanity[Vanity Repping]
-            GuildTag[Guild Tag Repping]
-        end
+    Service --> Repository[VanityConfigRepository]
+    Repository --> Database[(MySQL)]
 
-        JDA --> Presence
-        JDA --> Guild
-
-        Presence --> Vanity
-        Guild --> GuildTag
-    end
-
-    Discord --> JDA
-    Vanity --> JDA
-    GuildTag --> JDA
-    JDA --> Discord
+    Service --> Actions[Role changes and notifications]
+    Actions --> JDA
 ```
 
-## Technologies
-- **Java 17** - Core application development
-- **JDA (Java Discord API)** - Discord API integration and event handling
-- **Apache Maven** - Dependency management and build automation
-- **Git / GitHub** - Version control and project documentation
+This diagram focuses on the community repping functionality. Daily Reminders currently use their own command handler, repository and scheduler, which are planned for extraction.
 
-Yoko is packaged as an executable JAR for deployment.
+The architecture is evolving through incremental refactoring. Repping decisions are centralized in the service, while the service itself still works directly with JDA events and Discord objects.
+
+## Technologies
+
+- **Java 17** — Core application development
+- **JDA 6.2.0** — Discord API integration and event handling
+- **Apache Maven** — Build tooling and dependency management
+- **MySQL / JDBC** — Persistence for repping configuration and daily reminders
+- **SLF4J / Logback** — Application logging
+- **dotenv-java** — Environment-based configuration
+- **Git / GitHub** — Version control, documentation and development tracking
+
+## Learning Focus
+
+Yoko gives me a practical environment for developing and improving skills in:
+
+- Processing asynchronous events
+- Integrating with an external API
+- Organizing listeners, services and repositories
+- Persisting application data with SQL and JDBC
+- Refactoring an existing application incrementally
+- Separating features into independently maintainable applications
+- Collaborating with AI coding assistants for code reviews, debugging and architecture while critically evaluating their suggestions
 
 ## Source Code
-Yoko's source code is maintained in a private repository and is not publicly available.
-This repository serves as the public documentation of the project and contains information about its features, architecture and technical implementation.
 
-Source code access is only provided for review purposes in connection with job applications or professional inquiries.
+The application source code is maintained in a private repository.
+
+This public repository documents Yoko's functionality, architecture and development direction. It does not contain the application source or a runnable distribution.
+
+Source code access is available for review in connection with job applications or professional inquiries.
 
 ## Credits
 
-- **Vanity Role** - The vanity repping feature was inspired by [Vanity Roles](https://vanityroles.xyz/).
-- **Mermaid** - Diagrams in this repository were created using [Mermaid](https://mermaid.js.org/).
+- **Vanity Roles** — The Custom Status Repping feature was inspired by [Vanity Roles](https://vanityroles.xyz/).
+- **Mermaid** — Architecture and flow diagrams use [Mermaid](https://mermaid.js.org/).
